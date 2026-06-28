@@ -1,0 +1,1189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IT Study Planner</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --surface-2: #eef3f6;
+      --ink: #172026;
+      --muted: #63717a;
+      --line: #d7dee3;
+      --accent: #007c89;
+      --accent-2: #f2a900;
+      --danger: #c6413a;
+      --ok: #2f8b57;
+      --shadow: 0 8px 24px rgba(23, 32, 38, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: 0;
+      overflow: hidden;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .app {
+      height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+    }
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 18px;
+      display: grid;
+      gap: 12px;
+      box-shadow: var(--shadow);
+      z-index: 2;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      font-size: 22px;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: #e2f3f4;
+      color: #005c66;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .student-fields {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 5px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 8px 10px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 124, 137, 0.15);
+    }
+
+    .button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0 12px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .button:hover {
+      border-color: var(--accent);
+    }
+
+    .button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .button.warning {
+      background: #fff5dc;
+      border-color: #e3bf58;
+      color: #5a4100;
+    }
+
+    .button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(280px, 340px) 1fr;
+      min-height: 0;
+    }
+
+    .catalog {
+      border-right: 1px solid var(--line);
+      background: var(--surface);
+      min-height: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .catalog-tools {
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .course-count {
+      color: var(--muted);
+      font-size: 13px;
+      min-height: 18px;
+    }
+
+    .course-list {
+      min-height: 0;
+      overflow-y: auto;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .course-card {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 86px;
+      cursor: grab;
+      display: grid;
+      gap: 8px;
+    }
+
+    .course-card:active {
+      cursor: grabbing;
+    }
+
+    .course-card.planned {
+      opacity: 0.52;
+      cursor: default;
+    }
+
+    .course-card.blocked {
+      border-color: #df9a96;
+      background: #fff6f5;
+    }
+
+    .course-card.ready {
+      border-color: #9ccbad;
+      background: #f4fbf6;
+    }
+
+    .course-card.restricted {
+      border-color: #e3bf58;
+      background: #fff8e7;
+      cursor: not-allowed;
+    }
+
+    .course-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .code {
+      font-weight: 800;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .hours {
+      background: var(--surface-2);
+      border-radius: 999px;
+      padding: 3px 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .course-name {
+      font-size: 14px;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    .planner {
+      min-height: 0;
+      overflow: auto;
+      padding: 16px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 70px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .term-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(230px, 1fr));
+      gap: 12px;
+      align-items: start;
+    }
+
+    .term {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 330px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+    }
+
+    .term.drag-over {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 124, 137, 0.14);
+    }
+
+    .term-header {
+      padding: 10px;
+      background: #f3f6f7;
+      border-bottom: 1px solid var(--line);
+      display: grid;
+      gap: 6px;
+    }
+
+    .term-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+    }
+
+    .term-name {
+      overflow-wrap: anywhere;
+    }
+
+    .term-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .term-action {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .term-action:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .term-action.danger {
+      color: var(--danger);
+    }
+
+    .term-action.danger:hover:not(:disabled) {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .term-action:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    .term.extra .term-header {
+      cursor: grab;
+    }
+
+    .term.extra .term-header:active {
+      cursor: grabbing;
+    }
+
+    .term-total {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .dropzone {
+      min-height: 260px;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      min-height: 62px;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+    }
+
+    .planned-course {
+      position: relative;
+    }
+
+    .remove {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--danger);
+      cursor: pointer;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .remove:hover {
+      border-color: var(--danger);
+    }
+
+    .status-line {
+      color: var(--ok);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-line.problem {
+      color: var(--danger);
+    }
+
+    .status-line.warning {
+      color: var(--accent-2);
+    }
+
+    .notice {
+      display: none;
+      margin-bottom: 12px;
+      border: 1px solid #e3bf58;
+      background: #fff8e7;
+      color: #5a4100;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .notice.show {
+      display: block;
+    }
+
+    @media (max-width: 1100px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .catalog {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+        max-height: 420px;
+      }
+
+      .term-grid {
+        grid-template-columns: repeat(2, minmax(230px, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .student-fields,
+      .summary,
+      .term-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar,
+      .planner {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="title-row">
+        <div>
+          <h1>IT Study Planner</h1>
+          <span class="badge">New Regulation - IT</span>
+        </div>
+        <div class="actions">
+          <button class="button" id="loadSuggested" type="button">Load Suggested Path</button>
+          <button class="button" id="addSummer" type="button">Add Summer</button>
+          <button class="button" id="addSemester" type="button">Add Semester</button>
+          <button class="button warning" id="clearPlan" type="button">Clear</button>
+          <button class="button primary" id="exportExcel" type="button">Export Excel</button>
+        </div>
+      </div>
+      <section class="student-fields" aria-label="Student information">
+        <div class="field">
+          <label for="studentName">Student Name</label>
+          <input id="studentName" autocomplete="name" placeholder="Student name">
+        </div>
+        <div class="field">
+          <label for="studentId">Student ID</label>
+          <input id="studentId" placeholder="ID">
+        </div>
+        <div class="field">
+          <label for="planDate">Date</label>
+          <input id="planDate" type="date">
+        </div>
+      </section>
+    </header>
+
+    <section class="workspace">
+      <aside class="catalog" aria-label="Course catalog">
+        <div class="catalog-tools">
+          <div class="field">
+            <label for="search">Search</label>
+            <input id="search" placeholder="Code or course name">
+          </div>
+          <div class="field">
+            <label for="semesterFilter">Catalog Semester</label>
+            <select id="semesterFilter">
+              <option value="all">All semesters</option>
+            </select>
+          </div>
+          <div class="course-count" id="courseCount"></div>
+        </div>
+        <div class="course-list" id="courseList"></div>
+      </aside>
+
+      <section class="planner" aria-label="Study plan">
+        <div class="summary" aria-label="Plan summary">
+          <div class="metric"><span>Courses</span><strong id="metricCourses">0</strong></div>
+          <div class="metric"><span>Credit Hours</span><strong id="metricHours">0</strong></div>
+          <div class="metric"><span>Warnings</span><strong id="metricWarnings">0</strong></div>
+          <div class="metric"><span>Terms</span><strong id="metricTerms">8</strong></div>
+        </div>
+        <div class="notice" id="notice"></div>
+        <div class="term-grid" id="termGrid"></div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const COURSES = {
+      IT111: { name: "Electronics", semester: 1, prerequisites: [], hours: 3 },
+      MA111: { name: "Mathematics1", semester: 1, prerequisites: [], hours: 3 },
+      HU111: { name: "Technical Report Writing", semester: 1, prerequisites: [], hours: 2 },
+      HU413: { name: "Human Rights", semester: 1, prerequisites: [], hours: 2 },
+      MA112: { name: "Discrete Math", semester: 1, prerequisites: [], hours: 3 },
+      IT110: { name: "Introduction to Computers", semester: 1, prerequisites: [], hours: 3 },
+      ST121: { name: "Probability and Statistics-1", semester: 2, prerequisites: ["MA111"], hours: 3 },
+      HU112: { name: "Creative and Scientific Thinking", semester: 2, prerequisites: [], hours: 2 },
+      MA113: { name: "Mathematics-2", semester: 2, prerequisites: ["MA111"], hours: 3 },
+      HU101: { name: "Micro Economics", semester: 2, prerequisites: [], hours: 2 },
+      IT113: { name: "Logic Design", semester: 2, prerequisites: ["IT111"], hours: 3 },
+      CS112: { name: "Programming Language", semester: 2, prerequisites: ["IT110"], hours: 3 },
+      CS215: { name: "Object Oriented Programing", semester: 3, prerequisites: ["CS112"], hours: 3 },
+      DS211: { name: "Introduction to Database systems", semester: 3, prerequisites: ["CS112"], hours: 3 },
+      MA214: { name: "Mathematics-3", semester: 3, prerequisites: ["MA113"], hours: 3 },
+      IT231: { name: "Computer Networks Technology", semester: 3, prerequisites: ["IT110"], hours: 3 },
+      ST222: { name: "Probability and Statistics-2", semester: 3, prerequisites: ["ST121"], hours: 3 },
+      CS240: { name: "Introduction to Software Engineering", semester: 3, prerequisites: ["CS112"], hours: 3 },
+      IT217: { name: "Introduction to Operation Research", semester: 4, prerequisites: ["ST121", "CS112"], hours: 3 },
+      CS216: { name: "Data Structure", semester: 4, prerequisites: ["CS215"], hours: 3 },
+      AI321: { name: "Machine Learning Fundamentals", semester: 4, prerequisites: ["MA214", "ST222"], hours: 3 },
+      IT230: { name: "Web Technology", semester: 4, prerequisites: ["CS215"], hours: 3 },
+      HU427: { name: "Entrepreneurship", semester: 4, prerequisites: [], hours: 2 },
+      LB211: { name: "Networking Fundamentals lab", semester: 4, prerequisites: ["IT231"], hours: 2 },
+      LB312: { name: "Network Routing and Switching-Lab", semester: 5, prerequisites: ["LB211"], hours: 2 },
+      AI311: { name: "Artificial intelligence", semester: 5, prerequisites: ["CS216"], hours: 3 },
+      CS319: { name: "Operating Systems", semester: 5, prerequisites: ["CS216"], hours: 3 },
+      IT212: { name: "Digital Signal Processing", semester: 5, prerequisites: ["MA214"], hours: 3 },
+      CS318: { name: "Computer Organization", semester: 5, prerequisites: ["IT113", "CS216"], hours: 3 },
+      CS341: { name: "Algorithms analysis and Design", semester: 5, prerequisites: ["CS216"], hours: 3 },
+      IT322: { name: "Pattern Recognition", semester: 6, prerequisites: ["IT212", "ST222"], hours: 3 },
+      IT333: { name: "Information Computer Networks Security", semester: 6, prerequisites: ["IT231"], hours: 3 },
+      AI448: { name: "op-Natural Language Processing", semester: 6, prerequisites: ["AI321"], hours: 2 },
+      CS344: { name: "Advanced Software Engineering", semester: 6, prerequisites: ["CS240"], hours: 3 },
+      IT343: { name: "Microcontroller", semester: 6, prerequisites: ["IT231"], hours: 3 },
+      LB313: { name: "Ethical Hacking-lab", semester: 6, prerequisites: ["IT231"], hours: 2 },
+      LB421: { name: "Selected labs in Software Engineering", semester: 7, prerequisites: ["CS341", "CS344"], hours: 2 },
+      IT423: { name: "Embedded Systems", semester: 7, prerequisites: ["IT343"], hours: 3 },
+      IT221: { name: "Computer Graphics", semester: 7, prerequisites: ["CS215"], hours: 3 },
+      IT434: { name: "Advanced Computer Networks", semester: 7, prerequisites: ["IT231"], hours: 3 },
+      PC401: { name: "Project (1)", semester: 7, prerequisites: [], hours: 3 },
+      IT438: { name: "Communication Technology", semester: 7, prerequisites: ["IT231"], hours: 3 },
+      IT436: { name: "Cloud Computing Networking", semester: 8, prerequisites: ["IT434"], hours: 3 },
+      AI435: { name: "Semantic Web and ontology", semester: 8, prerequisites: ["AI311", "IT230"], hours: 2 },
+      IT439: { name: "Wireless and Mobile Networks", semester: 8, prerequisites: ["IT434"], hours: 3 },
+      HU402: { name: "Fundamental of Management", semester: 8, prerequisites: [], hours: 2 },
+      PC402: { name: "Project (2)", semester: 8, prerequisites: ["PC401"], hours: 3 },
+      LB431: { name: "Selected labs in AI", semester: 8, prerequisites: ["AI311"], hours: 2 },
+      TRAINING: { name: "Summer Training", semester: -1, prerequisites: [], hours: 2, summerOnly: true, minHours: 60 }
+    };
+
+    function makeDefaultTerms() {
+      return Array.from({ length: 8 }, (_, index) => ({
+        label: `Semester ${index + 1}`,
+        locked: true,
+        courses: []
+      }));
+    }
+
+    const state = {
+      terms: makeDefaultTerms(),
+      search: "",
+      semesterFilter: "all"
+    };
+
+    const els = {
+      courseList: document.getElementById("courseList"),
+      courseCount: document.getElementById("courseCount"),
+      semesterFilter: document.getElementById("semesterFilter"),
+      search: document.getElementById("search"),
+      termGrid: document.getElementById("termGrid"),
+      notice: document.getElementById("notice"),
+      metricCourses: document.getElementById("metricCourses"),
+      metricHours: document.getElementById("metricHours"),
+      metricWarnings: document.getElementById("metricWarnings"),
+      metricTerms: document.getElementById("metricTerms"),
+      studentName: document.getElementById("studentName"),
+      studentId: document.getElementById("studentId"),
+      planDate: document.getElementById("planDate")
+    };
+
+    const courseCodes = Object.keys(COURSES).sort((a, b) => {
+      const semDiff = COURSES[a].semester - COURSES[b].semester;
+      return semDiff || a.localeCompare(b);
+    });
+
+    function setup() {
+      els.planDate.valueAsDate = new Date();
+      
+      // Add Summer option
+      const summerOption = document.createElement("option");
+      summerOption.value = "summer";
+      summerOption.textContent = "Summer";
+      els.semesterFilter.appendChild(summerOption);
+      
+      // Add all semester options
+      for (let i = 1; i <= 8; i += 1) {
+        const option = document.createElement("option");
+        option.value = String(i);
+        option.textContent = `Semester ${i}`;
+        els.semesterFilter.appendChild(option);
+      }
+
+      els.search.addEventListener("input", () => {
+        state.search = els.search.value.trim().toLowerCase();
+        renderCatalog();
+      });
+
+      els.semesterFilter.addEventListener("change", () => {
+        state.semesterFilter = els.semesterFilter.value;
+        renderCatalog();
+      });
+
+      document.getElementById("loadSuggested").addEventListener("click", loadSuggestedPath);
+      document.getElementById("addSummer").addEventListener("click", addSummerTerm);
+      document.getElementById("addSemester").addEventListener("click", addAdditionalSemester);
+      document.getElementById("clearPlan").addEventListener("click", clearPlan);
+      document.getElementById("exportExcel").addEventListener("click", exportExcel);
+
+      render();
+    }
+
+    function getPlannedMap() {
+      const map = new Map();
+      state.terms.forEach((term, termIndex) => {
+        term.courses.forEach((code) => map.set(code, termIndex));
+      });
+      return map;
+    }
+
+    function isSummerTerm(termIndex) {
+      return state.terms[termIndex].label.toLowerCase().includes("summer");
+    }
+
+    function getTotalHours(excludeCode = null) {
+      const map = getPlannedMap();
+      let total = 0;
+      map.forEach((_, code) => {
+        if (code !== excludeCode) {
+          total += COURSES[code].hours;
+        }
+      });
+      return total;
+    }
+
+    function canAddSummerTraining(termIndex) {
+      const isSummer = isSummerTerm(termIndex);
+      const totalHours = getTotalHours();
+      return isSummer && totalHours >= 60;
+    }
+
+    function getCourseStatus(code, map = getPlannedMap()) {
+      const currentTerm = map.get(code);
+      const missing = [];
+      const late = [];
+      const course = COURSES[code];
+
+      // Check if it's Summer Training and validate summer-only restrictions
+      if (code === "TRAINING") {
+        if (currentTerm !== undefined) {
+          if (!isSummerTerm(currentTerm)) {
+            return { ok: false, missing: ["Can only be added in Summer terms"], late: [] };
+          }
+          const totalHours = getTotalHours("TRAINING");
+          if (totalHours < 60) {
+            return { ok: false, missing: [`Requires 60+ completed hours (currently ${totalHours}h)`], late: [] };
+          }
+        }
+        return { ok: true, missing: [], late: [] };
+      }
+
+      getAllPrerequisites(code).forEach((preCode) => {
+        if (!map.has(preCode)) {
+          missing.push(preCode);
+        } else if (currentTerm !== undefined && map.get(preCode) >= currentTerm) {
+          late.push(preCode);
+        }
+      });
+
+      if (missing.length || late.length) {
+        return { ok: false, missing, late };
+      }
+      return { ok: true, missing, late };
+    }
+
+    function getAllPrerequisites(code, visited = new Set()) {
+      const prerequisites = [];
+      COURSES[code].prerequisites.forEach((preCode) => {
+        if (!COURSES[preCode] || visited.has(preCode)) return;
+        visited.add(preCode);
+        prerequisites.push(preCode);
+        prerequisites.push(...getAllPrerequisites(preCode, visited));
+      });
+      return prerequisites;
+    }
+
+    function render() {
+      renderCatalog();
+      renderPlanner();
+    }
+
+    function renderCatalog() {
+      const planned = getPlannedMap();
+      const filtered = courseCodes.filter((code) => {
+        const course = COURSES[code];
+        const searchText = `${code} ${course.name}`.toLowerCase();
+        const matchesSearch = !state.search || searchText.includes(state.search);
+        
+        // Summer Training only shows when "Summer" filter is selected
+        if (code === "TRAINING") {
+          return matchesSearch && state.semesterFilter === "summer";
+        }
+        
+        const matchesSemester = state.semesterFilter === "all" || String(course.semester) === state.semesterFilter;
+        return matchesSearch && matchesSemester;
+      });
+
+      els.courseList.innerHTML = "";
+      filtered.forEach((code) => {
+        const card = createCourseCard(code, { catalog: true, planned: planned.has(code) });
+        els.courseList.appendChild(card);
+      });
+
+      els.courseCount.textContent = `${filtered.length} of ${courseCodes.length} courses`;
+    }
+
+    function renderPlanner() {
+      const map = getPlannedMap();
+      const warnings = getWarnings(map);
+      const plannedCount = Array.from(map.keys()).length;
+      const hours = Array.from(map.keys()).reduce((total, code) => total + COURSES[code].hours, 0);
+
+      els.metricCourses.textContent = String(plannedCount);
+      els.metricHours.textContent = String(hours);
+      els.metricWarnings.textContent = String(warnings.length);
+      els.metricTerms.textContent = String(state.terms.length);
+
+      if (warnings.length) {
+        els.notice.classList.add("show");
+        els.notice.textContent = warnings.slice(0, 3).join(" ");
+      } else {
+        els.notice.classList.remove("show");
+        els.notice.textContent = "";
+      }
+
+      els.termGrid.innerHTML = "";
+      state.terms.forEach((term, termIndex) => {
+        els.termGrid.appendChild(createTerm(term, termIndex, map));
+      });
+    }
+
+    function createTerm(termData, termIndex, map) {
+      const term = document.createElement("section");
+      const termCourses = termData.courses;
+      term.className = "term";
+      if (!termData.locked) term.classList.add("extra");
+      term.dataset.term = String(termIndex);
+
+      term.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        term.classList.add("drag-over");
+      });
+      term.addEventListener("dragleave", () => term.classList.remove("drag-over"));
+      term.addEventListener("drop", (event) => {
+        event.preventDefault();
+        term.classList.remove("drag-over");
+        const payload = readDragPayload(event);
+        if (!payload) return;
+
+        if (payload.type === "term") {
+          const bounds = term.getBoundingClientRect();
+          const placement = event.clientX < bounds.left + bounds.width / 2 ? "before" : "after";
+          moveTerm(payload.termIndex, termIndex, placement);
+          return;
+        }
+
+        if (!COURSES[payload.code]) return;
+        
+        // STRICT Check: Summer Training MUST have 60+ hours AND must be in summer term
+        if (payload.code === "TRAINING") {
+          const totalHours = getTotalHours();
+          const isSummer = isSummerTerm(termIndex);
+          
+          if (!isSummer) {
+            alert("❌ Summer Training can ONLY be added to Summer terms!");
+            return;
+          }
+          
+          if (totalHours < 60) {
+            alert(`❌ Summer Training requires 60+ credit hours.\nYou currently have: ${totalHours} hours.\nNeeded: ${60 - totalHours} more hours.`);
+            return;
+          }
+        }
+        
+        moveCourse(payload.code, termIndex);
+      });
+
+      const header = document.createElement("div");
+      header.className = "term-header";
+      header.draggable = !termData.locked;
+      header.addEventListener("dragstart", (event) => {
+        if (termData.locked) return;
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("application/json", JSON.stringify({ type: "term", termIndex }));
+        event.dataTransfer.setData("text/plain", `term:${termIndex}`);
+      });
+
+      const title = document.createElement("div");
+      title.className = "term-title";
+      const termName = document.createElement("span");
+      termName.className = "term-name";
+      termName.textContent = termData.label;
+      const termActions = document.createElement("span");
+      termActions.className = "term-actions";
+
+      if (termData.locked) {
+        const courseCount = document.createElement("span");
+        courseCount.textContent = `${termCourses.length} courses`;
+        termActions.appendChild(courseCount);
+      } else {
+        const previous = document.createElement("button");
+        previous.type = "button";
+        previous.className = "term-action";
+        previous.textContent = "<";
+        previous.title = `Move ${termData.label} before the previous term`;
+        previous.setAttribute("aria-label", `Move ${termData.label} before the previous term`);
+        previous.disabled = termIndex === 0;
+        previous.addEventListener("click", () => moveTermByStep(termIndex, -1));
+
+        const next = document.createElement("button");
+        next.type = "button";
+        next.className = "term-action";
+        next.textContent = ">";
+        next.title = `Move ${termData.label} after the next term`;
+        next.setAttribute("aria-label", `Move ${termData.label} after the next term`);
+        next.disabled = termIndex === state.terms.length - 1;
+        next.addEventListener("click", () => moveTermByStep(termIndex, 1));
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "term-action danger";
+        remove.textContent = "X";
+        remove.title = `Remove ${termData.label}`;
+        remove.setAttribute("aria-label", `Remove ${termData.label}`);
+        remove.addEventListener("click", () => removeTerm(termIndex));
+
+        termActions.append(previous, next, remove);
+      }
+
+      title.append(termName, termActions);
+      const total = document.createElement("div");
+      total.className = "term-total";
+      const hours = termCourses.reduce((sum, code) => sum + COURSES[code].hours, 0);
+      total.textContent = `${termCourses.length} courses | ${hours} credit hours`;
+      header.append(title, total);
+
+      const dropzone = document.createElement("div");
+      dropzone.className = "dropzone";
+      if (!termCourses.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "Empty";
+        dropzone.appendChild(empty);
+      } else {
+        termCourses.forEach((code) => dropzone.appendChild(createCourseCard(code, { termIndex, map })));
+      }
+
+      term.append(header, dropzone);
+      return term;
+    }
+
+    function createCourseCard(code, options = {}) {
+      const course = COURSES[code];
+      const card = document.createElement("article");
+      const map = options.map || getPlannedMap();
+      const status = getCourseStatus(code, map);
+      const isSummerTraining = code === "TRAINING";
+
+      card.className = "course-card";
+      if (options.planned) card.classList.add("planned");
+      if (!options.catalog && !status.ok) card.classList.add("blocked");
+      if (!options.catalog && status.ok && !isSummerTraining) card.classList.add("ready");
+      if (!options.catalog && isSummerTraining && status.ok) card.classList.add("ready");
+
+      const totalHours = getTotalHours();
+      const canDragTraining = isSummerTraining && totalHours >= 60;
+      
+      card.draggable = !options.planned && (isSummerTraining ? canDragTraining : true);
+      
+      if (isSummerTraining && !canDragTraining && !options.planned) {
+        card.classList.add("restricted");
+        card.style.cursor = "not-allowed";
+        card.style.opacity = "0.6";
+      }
+      
+      card.dataset.code = code;
+      card.addEventListener("dragstart", (event) => {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("application/json", JSON.stringify({ code }));
+        event.dataTransfer.setData("text/plain", code);
+      });
+
+      const prerequisites = course.prerequisites.length ? course.prerequisites.join(", ") : "None";
+      let statusText = status.ok ? "✓ Ready" : `✗ ${status.missing.concat(status.late).join(", ")}`;
+      
+      // Special status message for Summer Training
+      if (isSummerTraining) {
+        if (totalHours < 60) {
+          statusText = `✗ RESTRICTED: Need ${60 - totalHours} more hours (${totalHours}/${60}h)`;
+        } else {
+          statusText = `✓ AVAILABLE: ${totalHours}/${60}h completed`;
+        }
+      }
+
+      let metaText = `Recommended: semester ${course.semester} | Prereq: ${escapeHtml(prerequisites)}`;
+      if (isSummerTraining) {
+        metaText = `Summer Only | Requires 60+ hours | Prereq: None`;
+      }
+
+      card.innerHTML = `
+        <div class="course-head">
+          <span class="code">${escapeHtml(code)}</span>
+          <span class="hours">${course.hours}h</span>
+        </div>
+        <div class="course-name">${escapeHtml(course.name)}</div>
+        <div class="meta">${metaText}</div>
+      `;
+
+      if (!options.catalog) {
+        const footer = document.createElement("div");
+        footer.className = `status-line${status.ok ? "" : " problem"}`;
+        if (isSummerTraining && status.ok) footer.className = "status-line";
+        if (isSummerTraining && !status.ok) footer.className = "status-line problem";
+        footer.textContent = statusText;
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "remove";
+        remove.title = `Remove ${code}`;
+        remove.setAttribute("aria-label", `Remove ${code}`);
+        remove.textContent = "X";
+        remove.addEventListener("click", () => removeCourse(code));
+        const head = card.querySelector(".course-head");
+        head.appendChild(remove);
+        card.appendChild(footer);
+      }
+
+      return card;
+    }
+
+    function readDragPayload(event) {
+      try {
+        return JSON.parse(event.dataTransfer.getData("application/json"));
+      } catch {
+        const code = event.dataTransfer.getData("text/plain");
+        return code ? { code } : null;
+      }
+    }
+
+    function moveCourse(code, targetTerm) {
+      state.terms.forEach((term) => {
+        const index = term.courses.indexOf(code);
+        if (index >= 0) term.courses.splice(index, 1);
+      });
+      state.terms[targetTerm].courses.push(code);
+      state.terms[targetTerm].courses.sort((a, b) => {
+        const semDiff = COURSES[a].semester - COURSES[b].semester;
+        return semDiff || a.localeCompare(b);
+      });
+      render();
+    }
+
+    function removeCourse(code) {
+      state.terms.forEach((term) => {
+        const index = term.courses.indexOf(code);
+        if (index >= 0) term.courses.splice(index, 1);
+      });
+      render();
+    }
+
+    function moveTerm(fromIndex, toIndex, placement) {
+      const [term] = state.terms.splice(fromIndex, 1);
+      const insertIndex = placement === "before" ? toIndex : toIndex + 1;
+      state.terms.splice(insertIndex, 0, term);
+      render();
+    }
+
+    function moveTermByStep(termIndex, step) {
+      const newIndex = termIndex + step;
+      if (newIndex < 0 || newIndex >= state.terms.length) return;
+      moveTerm(termIndex, newIndex, step > 0 ? "after" : "before");
+    }
+
+    function removeTerm(termIndex) {
+      const term = state.terms[termIndex];
+      if (term.courses.length > 0) {
+        const confirmed = confirm(`This term has ${term.courses.length} course(s). Remove it anyway?`);
+        if (!confirmed) return;
+      }
+      state.terms.splice(termIndex, 1);
+      render();
+    }
+
+    function loadSuggestedPath() {
+      state.terms = makeDefaultTerms();
+      courseCodes.forEach((code) => {
+        if (code === "TRAINING") return; // Skip Summer Training in suggested path
+        const termIndex = Math.max(0, Math.min(7, COURSES[code].semester - 1));
+        state.terms[termIndex].courses.push(code);
+      });
+      render();
+    }
+
+    function clearPlan() {
+      state.terms.forEach((term) => {
+        term.courses = [];
+      });
+      render();
+    }
+
+    function addSummerTerm() {
+      const summerCount = state.terms.filter((term) => term.label.startsWith("Summer")).length + 1;
+      state.terms.push({ label: `Summer ${summerCount}`, locked: false, courses: [] });
+      render();
+    }
+
+    function addAdditionalSemester() {
+      const semesterCount = state.terms.filter((term) => term.label.startsWith("Semester")).length + 1;
+      state.terms.push({ label: `Semester ${semesterCount}`, locked: false, courses: [] });
+      render();
+    }
+
+    function getWarnings(map = getPlannedMap()) {
+      const warnings = [];
+      state.terms.forEach((term, termIndex) => {
+        term.courses.forEach((code) => {
+          const status = getCourseStatus(code, map);
+          if (status.missing.length) {
+            warnings.push(`${code} in ${state.terms[termIndex].label} is missing ${status.missing.join(", ")}.`);
+          }
+          if (status.late.length) {
+            warnings.push(`${code} in ${state.terms[termIndex].label} needs ${status.late.join(", ")} in an earlier semester.`);
+          }
+        });
+      });
+      return warnings;
+    }
+
+    function exportExcel() {
+      const rows = buildExportRows();
+      const fileName = buildFileName();
+      const worksheet = rows.map((row) => `
+        <Row>${row.map((cell) => `<Cell><Data ss:Type="String">${xmlEscape(String(cell))}</Data></Cell>`).join("")}</Row>
+      `).join("");
+      const workbook = `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:x="urn:schemas-microsoft-com:office:excel"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Worksheet ss:Name="IT Study Plan">
+    <Table>${worksheet}</Table>
+  </Worksheet>
+</Workbook>`;
+
+      const blob = new Blob([workbook], { type: "application/vnd.ms-excel" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function buildExportRows() {
+      const map = getPlannedMap();
+      const rows = [
+        ["IT Study Plan"],
+        ["Student Name", els.studentName.value || ""],
+        ["Student ID", els.studentId.value || ""],
+        ["Date", els.planDate.value || ""],
+        [],
+        ["Semester No", "Courses Taken", "Credit Hours"]
+      ];
+
+      state.terms.forEach((term) => {
+        const coursesTaken = term.courses
+          .map((code) => `${code} - ${COURSES[code].name}`)
+          .join("; ");
+        const termHours = term.courses.reduce((sum, code) => sum + COURSES[code].hours, 0);
+        rows.push([term.label, coursesTaken, termHours]);
+      });
+
+      rows.push([]);
+      rows.push(["Total Courses", Array.from(map.keys()).length]);
+      rows.push(["Total Credit Hours", Array.from(map.keys()).reduce((sum, code) => sum + COURSES[code].hours, 0)]);
+      return rows;
+    }
+
+    function buildFileName() {
+      const id = els.studentId.value.trim();
+      const name = els.studentName.value.trim();
+      const raw = id || name || "student";
+      const clean = raw.replace(/[^a-z0-9_-]+/gi, "-").replace(/^-+|-+$/g, "") || "student";
+      return `it-study-plan-${clean}.xls`;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function xmlEscape(value) {
+      return escapeHtml(value).replace(/'/g, "&apos;");
+    }
+
+    setup();
+  </script>
+</body>
+</html>
